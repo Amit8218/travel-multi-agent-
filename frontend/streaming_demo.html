@@ -1,0 +1,902 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Travel Agent Streaming Demo ⚡</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- FontAwesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Marked.js for markdown rendering -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <style>
+        :root {
+            --bg-gradient: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%);
+            --panel-bg: rgba(30, 41, 59, 0.45);
+            --panel-border: rgba(255, 255, 255, 0.08);
+            --accent-primary: #8b5cf6;
+            --accent-secondary: #06b6d4;
+            --accent-success: #10b981;
+            --accent-error: #ef4444;
+            --text-primary: #f8fafc;
+            --text-secondary: #94a3b8;
+            --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background: var(--bg-gradient);
+            color: var(--text-primary);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 2rem 1rem;
+            overflow-x: hidden;
+        }
+
+        header {
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+
+        h1 {
+            font-family: 'Outfit', sans-serif;
+            font-size: 2.5rem;
+            font-weight: 700;
+            background: linear-gradient(to right, #a78bfa, #22d3ee);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 0.5rem;
+        }
+
+        p.subtitle {
+            color: var(--text-secondary);
+            font-size: 1rem;
+        }
+
+        main {
+            width: 100%;
+            max-width: 1100px;
+            display: grid;
+            grid-template-columns: 420px 1fr;
+            gap: 2rem;
+            align-items: start;
+        }
+
+        @media (max-width: 900px) {
+            main {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .glass-panel {
+            background: var(--panel-bg);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid var(--panel-border);
+            border-radius: 16px;
+            padding: 1.75rem;
+            box-shadow: var(--glass-shadow);
+        }
+
+        .section-title {
+            font-family: 'Outfit', sans-serif;
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 1.25rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--text-primary);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding-bottom: 0.5rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.25rem;
+        }
+
+        label {
+            display: block;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        select, input, textarea {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            color: var(--text-primary);
+            font-family: inherit;
+            font-size: 0.95rem;
+            transition: all 0.3s ease;
+        }
+
+        select:focus, input:focus, textarea:focus {
+            outline: none;
+            border-color: var(--accent-primary);
+            box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.25);
+        }
+
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+
+        button.btn-primary {
+            width: 100%;
+            padding: 0.85rem;
+            background: linear-gradient(135deg, var(--accent-primary) 0%, #7c3aed 100%);
+            border: none;
+            border-radius: 8px;
+            color: white;
+            font-family: inherit;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            margin-top: 1rem;
+            box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
+        }
+
+        button.btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(139, 92, 246, 0.45);
+        }
+
+        button.btn-primary:active {
+            transform: translateY(0);
+        }
+
+        button.btn-primary:disabled {
+            background: rgba(148, 163, 184, 0.3);
+            color: var(--text-secondary);
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        /* Agents Progress Panel */
+        .agent-list {
+            margin-top: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .agent-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0.75rem 1rem;
+            background: rgba(15, 23, 42, 0.4);
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.03);
+            transition: all 0.3s ease;
+        }
+
+        .agent-item.pending {
+            opacity: 0.4;
+        }
+
+        .agent-item.active {
+            border-color: var(--accent-secondary);
+            box-shadow: 0 0 10px rgba(6, 182, 212, 0.2);
+            opacity: 1;
+            background: rgba(6, 182, 212, 0.05);
+        }
+
+        .agent-item.completed {
+            border-color: var(--accent-success);
+            opacity: 1;
+            background: rgba(16, 185, 129, 0.05);
+        }
+
+        .agent-item.failed {
+            border-color: var(--accent-error);
+            opacity: 1;
+            background: rgba(239, 68, 68, 0.05);
+        }
+
+        .agent-info {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .agent-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.05);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            transition: all 0.3s ease;
+        }
+
+        .agent-item.active .agent-icon {
+            background: rgba(6, 182, 212, 0.2);
+            color: var(--accent-secondary);
+        }
+
+        .agent-item.completed .agent-icon {
+            background: rgba(16, 185, 129, 0.2);
+            color: var(--accent-success);
+        }
+
+        .agent-item.failed .agent-icon {
+            background: rgba(239, 68, 68, 0.2);
+            color: var(--accent-error);
+        }
+
+        .agent-name {
+            font-size: 0.9rem;
+            font-weight: 600;
+            text-transform: capitalize;
+        }
+
+        .agent-status-badge {
+            font-size: 0.75rem;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .status-pending { background: rgba(148, 163, 184, 0.15); color: var(--text-secondary); }
+        .status-running { background: rgba(6, 182, 212, 0.2); color: var(--accent-secondary); animation: pulse 1.5s infinite; }
+        .status-done { background: rgba(16, 185, 129, 0.2); color: var(--accent-success); }
+        .status-failed { background: rgba(239, 68, 68, 0.2); color: var(--accent-error); }
+
+        @keyframes pulse {
+            0% { opacity: 0.6; }
+            50% { opacity: 1; }
+            100% { opacity: 0.6; }
+        }
+
+        /* Output View */
+        .right-column {
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+            height: 100%;
+        }
+
+        .output-panel {
+            flex-grow: 1;
+            min-height: 500px;
+            max-height: 750px;
+            overflow-y: auto;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .output-content {
+            font-size: 1rem;
+            line-height: 1.6;
+            color: #e2e8f0;
+            flex-grow: 1;
+        }
+
+        /* Markdown Styling inside Output */
+        .output-content h1, .output-content h2, .output-content h3 {
+            font-family: 'Outfit', sans-serif;
+            margin-top: 1.5rem;
+            margin-bottom: 0.75rem;
+            color: var(--text-primary);
+        }
+        .output-content h1 { font-size: 1.75rem; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 0.5rem; }
+        .output-content h2 { font-size: 1.35rem; }
+        .output-content h3 { font-size: 1.1rem; }
+        .output-content p { margin-bottom: 1rem; }
+        .output-content ul, .output-content ol { margin-bottom: 1rem; padding-left: 1.5rem; }
+        .output-content li { margin-bottom: 0.4rem; }
+        .output-content code { background: rgba(15, 23, 42, 0.7); padding: 0.2rem 0.4rem; border-radius: 4px; font-size: 0.9em; font-family: monospace; }
+        .output-content pre { background: rgba(15, 23, 42, 0.7); padding: 1rem; border-radius: 8px; overflow-x: auto; margin-bottom: 1rem; }
+        .output-content pre code { background: none; padding: 0; }
+        .output-content blockquote { border-left: 4px solid var(--accent-primary); background: rgba(139, 92, 246, 0.05); padding: 0.5rem 1rem; margin-bottom: 1rem; border-radius: 0 8px 8px 0; }
+        .output-content a { color: var(--accent-secondary); text-decoration: none; }
+        .output-content a:hover { text-decoration: underline; }
+
+        /* Meta and Trace Panel */
+        .meta-panel {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            margin-top: auto;
+            padding-top: 1.5rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .trace-badge {
+            background: rgba(139, 92, 246, 0.15);
+            color: #c084fc;
+            padding: 0.25rem 0.6rem;
+            border-radius: 20px;
+            font-family: monospace;
+            border: 1px solid rgba(139, 92, 246, 0.25);
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+
+        .system-logs {
+            background: rgba(15, 23, 42, 0.5);
+            border-radius: 12px;
+            border: 1px solid var(--panel-border);
+            padding: 1rem;
+            font-family: monospace;
+            font-size: 0.8rem;
+            max-height: 150px;
+            overflow-y: auto;
+            color: var(--accent-secondary);
+        }
+
+        .log-entry {
+            margin-bottom: 0.35rem;
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .log-time { color: var(--text-secondary); }
+        .log-msg {}
+
+        /* Utility classes */
+        .hidden { display: none !important; }
+        .spinner { animation: spin 1s linear infinite; }
+        @keyframes spin { 100% { transform: rotate(360deg); } }
+
+        .placeholder-text {
+            color: var(--text-secondary);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 300px;
+            text-align: center;
+            gap: 1rem;
+        }
+
+        .placeholder-text i {
+            font-size: 3rem;
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>AI Travel Guide Planner ⚡</h1>
+        <p class="subtitle">Real-time Multi-Agent Travel Planner with SSE Token Streaming</p>
+    </header>
+
+    <main>
+        <!-- Left Column: Settings and Input Form -->
+        <div class="left-column" style="display: flex; flex-direction: column; gap: 1.5rem;">
+            <div class="glass-panel">
+                <div class="section-title">
+                    <i class="fa-solid fa-sliders"></i> Mode & Settings
+                </div>
+
+                <div class="form-group">
+                    <label for="endpoint-select">Endpoint / Workflow</label>
+                    <select id="endpoint-select" onchange="toggleFormMode()">
+                        <option value="/chat/stream">Freeform Chat (/chat/stream)</option>
+                        <option value="/plan-trip/stream">Structured Planning (/plan-trip/stream)</option>
+                        <option value="/ready-to-go-plan/stream">Ready-to-Go Plan (/ready-to-go-plan/stream)</option>
+                    </select>
+                </div>
+
+                <!-- Chat Input Form -->
+                <div id="chat-form-fields">
+                    <div class="form-group">
+                        <label for="chat-message">Your Prompt</label>
+                        <textarea id="chat-message" rows="4" placeholder="Plan a 3-day budget trip to Jaipur from Delhi for 2 people..."></textarea>
+                    </div>
+                </div>
+
+                <!-- Structured Planning Form -->
+                <div id="planning-form-fields" class="hidden">
+                    <div class="grid-2">
+                        <div class="form-group">
+                            <label for="plan-source">Source City</label>
+                            <input type="text" id="plan-source" value="Delhi">
+                        </div>
+                        <div class="form-group">
+                            <label for="plan-destination">Destination</label>
+                            <input type="text" id="plan-destination" placeholder="e.g. Jaipur">
+                        </div>
+                    </div>
+
+                    <div class="grid-2">
+                        <div class="form-group">
+                            <label for="plan-days">Days</label>
+                            <input type="number" id="plan-days" value="3" min="1" max="10">
+                        </div>
+                        <div class="form-group">
+                            <label for="plan-people">People</label>
+                            <input type="number" id="plan-people" value="2" min="1">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="plan-budget">Budget Limit (INR)</label>
+                        <input type="text" id="plan-budget" value="15000">
+                    </div>
+
+                    <div class="grid-2">
+                        <div class="form-group">
+                            <label for="plan-style">Travel Style</label>
+                            <select id="plan-style">
+                                <option value="budget" selected>Budget</option>
+                                <option value="medium">Medium</option>
+                                <option value="luxury">Luxury</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="plan-food">Food preference</label>
+                            <input type="text" id="plan-food" placeholder="e.g. Vegetarian, None">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="plan-interests">Interests</label>
+                        <input type="text" id="plan-interests" placeholder="e.g. history, sightseeing, food">
+                    </div>
+
+                    <div class="form-group" id="date-group">
+                        <label for="plan-date">Travel Date</label>
+                        <input type="date" id="plan-date" value="2026-07-10">
+                    </div>
+                </div>
+
+                <button class="btn-primary" id="submit-btn" onclick="startGeneration()">
+                    <i class="fa-solid fa-bolt"></i> Generate Stream Plan
+                </button>
+            </div>
+
+            <!-- Agent Execution Progress List -->
+            <div class="glass-panel">
+                <div class="section-title">
+                    <i class="fa-solid fa-network-wired"></i> Agent Pipeline Status
+                </div>
+                <div class="agent-list" id="agent-pipeline">
+                    <div class="agent-item pending" id="agent-supervisor">
+                        <div class="agent-info">
+                            <span class="agent-icon"><i class="fa-solid fa-brain"></i></span>
+                            <span class="agent-name">Supervisor</span>
+                        </div>
+                        <span class="agent-status-badge status-pending">Pending</span>
+                    </div>
+                    <div class="agent-item pending" id="agent-destination">
+                        <div class="agent-info">
+                            <span class="agent-icon"><i class="fa-solid fa-map-location-dot"></i></span>
+                            <span class="agent-name">Destination</span>
+                        </div>
+                        <span class="agent-status-badge status-pending">Pending</span>
+                    </div>
+                    <div class="agent-item pending" id="agent-weather">
+                        <div class="agent-info">
+                            <span class="agent-icon"><i class="fa-solid fa-cloud-sun"></i></span>
+                            <span class="agent-name">Weather</span>
+                        </div>
+                        <span class="agent-status-badge status-pending">Pending</span>
+                    </div>
+                    <div class="agent-item pending" id="agent-transport">
+                        <div class="agent-info">
+                            <span class="agent-icon"><i class="fa-solid fa-train"></i></span>
+                            <span class="agent-name">Transport</span>
+                        </div>
+                        <span class="agent-status-badge status-pending">Pending</span>
+                    </div>
+                    <div class="agent-item pending" id="agent-hotel">
+                        <div class="agent-info">
+                            <span class="agent-icon"><i class="fa-solid fa-hotel"></i></span>
+                            <span class="agent-name">Hotel</span>
+                        </div>
+                        <span class="agent-status-badge status-pending">Pending</span>
+                    </div>
+                    <div class="agent-item pending" id="agent-food">
+                        <div class="agent-info">
+                            <span class="agent-icon"><i class="fa-solid fa-utensils"></i></span>
+                            <span class="agent-name">Food</span>
+                        </div>
+                        <span class="agent-status-badge status-pending">Pending</span>
+                    </div>
+                    <div class="agent-item pending" id="agent-budget">
+                        <div class="agent-info">
+                            <span class="agent-icon"><i class="fa-solid fa-wallet"></i></span>
+                            <span class="agent-name">Budget</span>
+                        </div>
+                        <span class="agent-status-badge status-pending">Pending</span>
+                    </div>
+                    <div class="agent-item pending" id="agent-itinerary">
+                        <div class="agent-info">
+                            <span class="agent-icon"><i class="fa-solid fa-calendar-days"></i></span>
+                            <span class="agent-name">Itinerary</span>
+                        </div>
+                        <span class="agent-status-badge status-pending">Pending</span>
+                    </div>
+                    <div class="agent-item pending" id="agent-booking_link">
+                        <div class="agent-info">
+                            <span class="agent-icon"><i class="fa-solid fa-link"></i></span>
+                            <span class="agent-name">Booking links</span>
+                        </div>
+                        <span class="agent-status-badge status-pending">Pending</span>
+                    </div>
+                    <div class="agent-item pending" id="agent-safety">
+                        <div class="agent-info">
+                            <span class="agent-icon"><i class="fa-solid fa-shield-halved"></i></span>
+                            <span class="agent-name">Safety</span>
+                        </div>
+                        <span class="agent-status-badge status-pending">Pending</span>
+                    </div>
+                    <div class="agent-item pending" id="agent-final_merge">
+                        <div class="agent-info">
+                            <span class="agent-icon"><i class="fa-solid fa-compress"></i></span>
+                            <span class="agent-name">Final merge</span>
+                        </div>
+                        <span class="agent-status-badge status-pending">Pending</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Column: Results Stream Output -->
+        <div class="right-column">
+            <div class="glass-panel output-panel">
+                <div class="section-title">
+                    <i class="fa-solid fa-square-poll-horizontal"></i> Real-time Travel Plan Output
+                </div>
+
+                <div class="placeholder-text" id="output-placeholder">
+                    <i class="fa-solid fa-compass"></i>
+                    <p>Enter your request details and click "Generate Stream Plan" to view the multi-agent execution output in real time.</p>
+                </div>
+
+                <div class="output-content hidden" id="output-content"></div>
+
+                <div class="meta-panel hidden" id="output-meta">
+                    <span id="agents-used-label">Agents: None</span>
+                    <span class="trace-badge" id="trace-container"><i class="fa-solid fa-link-slash"></i> No Trace</span>
+                </div>
+            </div>
+
+            <!-- Console Log Panel -->
+            <div class="glass-panel">
+                <div class="section-title" style="font-size: 1rem; margin-bottom: 0.75rem;">
+                    <i class="fa-solid fa-terminal"></i> Console Logs
+                </div>
+                <div class="system-logs" id="console-logs">
+                    <div class="log-entry"><span class="log-time">[System]</span> <span class="log-msg">Ready to connect...</span></div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        const BACKEND_URL = window.location.origin === "null" || window.location.protocol === "file:" ? "http://127.0.0.1:8000" : window.location.origin;
+
+        const agentIds = [
+            "supervisor", "destination", "weather", "transport", "hotel", 
+            "food", "budget", "itinerary", "booking_link", "safety", "final_merge"
+        ];
+
+        let showAgentProgress = false;
+
+        async function fetchConfig() {
+            try {
+                const res = await fetch(`${BACKEND_URL}/health`);
+                if (res.ok) {
+                    const data = await res.json();
+                    showAgentProgress = !!data.show_agent_progress;
+                }
+            } catch (err) {
+                console.error("Failed to fetch health configuration:", err);
+            }
+            togglePipelineVisibility();
+        }
+
+        function togglePipelineVisibility() {
+            // Get Agent pipeline status panel and logs panel
+            const pipelinePanel = document.getElementById("agent-pipeline").parentElement;
+            const logsPanel = document.getElementById("console-logs").parentElement;
+            
+            if (showAgentProgress) {
+                pipelinePanel.classList.remove("hidden");
+                logsPanel.classList.remove("hidden");
+            } else {
+                pipelinePanel.classList.add("hidden");
+                logsPanel.classList.add("hidden");
+            }
+        }
+
+        window.addEventListener("DOMContentLoaded", fetchConfig);
+
+        function toggleFormMode() {
+            const endpoint = document.getElementById("endpoint-select").value;
+            const chatFields = document.getElementById("chat-form-fields");
+            const planningFields = document.getElementById("planning-form-fields");
+
+            if (endpoint === "/chat/stream") {
+                chatFields.classList.remove("hidden");
+                planningFields.classList.add("hidden");
+            } else {
+                chatFields.classList.add("hidden");
+                planningFields.classList.remove("hidden");
+            }
+            
+            // Log setting change
+            addLog("System", `Switched to endpoint ${endpoint}`);
+        }
+
+        function addLog(source, msg) {
+            if (!showAgentProgress) return;
+            const container = document.getElementById("console-logs");
+            const time = new Date().toLocaleTimeString();
+            
+            const logEntry = document.createElement("div");
+            logEntry.className = "log-entry";
+            logEntry.innerHTML = `<span class="log-time">[${time}] [${source}]</span> <span class="log-msg">${msg}</span>`;
+            container.appendChild(logEntry);
+            container.scrollTop = container.scrollHeight;
+        }
+
+        function resetAgentStatus() {
+            if (!showAgentProgress) return;
+            agentIds.forEach(id => {
+                const el = document.getElementById(`agent-${id}`);
+                if (el) {
+                    el.className = "agent-item pending";
+                    const badge = el.querySelector(".agent-status-badge");
+                    badge.className = "agent-status-badge status-pending";
+                    badge.textContent = "Pending";
+                }
+            });
+        }
+
+        function updateAgentStatus(agent, status, message = "") {
+            if (!showAgentProgress) return;
+            const el = document.getElementById(`agent-${agent}`);
+            if (!el) return;
+
+            el.classList.remove("pending", "active", "completed", "failed");
+            const badge = el.querySelector(".agent-status-badge");
+
+            if (status === "started" || status === "running") {
+                el.classList.add("active");
+                badge.className = "agent-status-badge status-running";
+                badge.innerHTML = `<i class="fa-solid fa-spinner spinner"></i> Running`;
+                addLog(agent, `Agent started execution${message ? ': ' + message : ''}`);
+            } else if (status === "completed" || status === "done") {
+                el.classList.add("completed");
+                badge.className = "agent-status-badge status-done";
+                badge.innerHTML = `<i class="fa-solid fa-circle-check"></i> Completed`;
+                addLog(agent, `Agent completed execution successfully`);
+            } else if (status === "failed") {
+                el.classList.add("failed");
+                badge.className = "agent-status-badge status-failed";
+                badge.innerHTML = `<i class="fa-solid fa-triangle-exclamation"></i> Failed`;
+                addLog(agent, `Agent failed during execution: ${message}`);
+            }
+        }
+
+        async function startGeneration() {
+            const submitBtn = document.getElementById("submit-btn");
+            const endpoint = document.getElementById("endpoint-select").value;
+            const outputPlaceholder = document.getElementById("output-placeholder");
+            const outputContent = document.getElementById("output-content");
+            const outputMeta = document.getElementById("output-meta");
+            const traceContainer = document.getElementById("trace-container");
+            const agentsUsedLabel = document.getElementById("agents-used-label");
+
+            // Disable UI inputs
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = `<i class="fa-solid fa-spinner spinner"></i> Generation streaming...`;
+
+            // Reset Output
+            outputPlaceholder.classList.add("hidden");
+            outputContent.classList.remove("hidden");
+            outputContent.innerHTML = "";
+            outputMeta.classList.add("hidden");
+            resetAgentStatus();
+
+            addLog("System", `Initializing connection to API endpoint: ${endpoint}`);
+
+            let requestBody = {};
+            
+            if (endpoint === "/chat/stream") {
+                const messageVal = document.getElementById("chat-message").value.trim();
+                if (!messageVal) {
+                    alert("Please enter a chat message!");
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = `<i class="fa-solid fa-bolt"></i> Generate Stream Plan`;
+                    outputPlaceholder.classList.remove("hidden");
+                    outputContent.classList.add("hidden");
+                    return;
+                }
+                requestBody = { message: messageVal };
+            } else {
+                const dest = document.getElementById("plan-destination").value.trim();
+                if (!dest) {
+                    alert("Please enter a destination!");
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = `<i class="fa-solid fa-bolt"></i> Generate Stream Plan`;
+                    outputPlaceholder.classList.remove("hidden");
+                    outputContent.classList.add("hidden");
+                    return;
+                }
+
+                requestBody = {
+                    source: document.getElementById("plan-source").value.trim(),
+                    destination: dest,
+                    days: parseInt(document.getElementById("plan-days").value),
+                    people: parseInt(document.getElementById("plan-people").value),
+                    budget: document.getElementById("plan-budget").value.trim(),
+                    interests: document.getElementById("plan-interests").value.trim() || null,
+                    travel_style: document.getElementById("plan-style").value,
+                    food_preference: document.getElementById("plan-food").value.trim() || null
+                };
+
+                if (endpoint === "/ready-to-go-plan/stream") {
+                    requestBody.travel_date = document.getElementById("plan-date").value || "2026-07-10";
+                }
+            }
+
+            try {
+                const response = await fetch(`${BACKEND_URL}${endpoint}`, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify(requestBody)
+                });
+
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    throw new Error(`Server returned status ${response.status}: ${errorText}`);
+                }
+
+                const reader = response.body.getReader();
+                const decoder = new TextDecoder();
+                let accumulatedPlan = "";
+                let buffer = "";
+
+                while (true) {
+                    const { value, done } = await reader.read();
+                    if (done) break;
+
+                    buffer += decoder.decode(value, { stream: true });
+                    const parts = buffer.split("\n\n");
+                    buffer = parts.pop();
+
+                    for (const part of parts) {
+                        if (!part.trim()) continue;
+
+                        let eventType = "";
+                        let dataJson = "";
+
+                        const lines = part.split("\n");
+                        for (const line of lines) {
+                            if (line.startsWith("event:")) {
+                                eventType = line.replace("event:", "").trim();
+                            } else if (line.startsWith("data:")) {
+                                dataJson = line.replace("data:", "").trim();
+                            }
+                        }
+
+                        if (eventType && dataJson) {
+                            try {
+                                const data = JSON.parse(dataJson);
+                                
+                                switch (eventType) {
+                                    case "start":
+                                        addLog("Stream", `Connection opened. Message: ${data.message || 'Started'}`);
+                                        outputContent.innerHTML = `<div style="color: var(--text-secondary); font-style: italic;"><i class="fa-solid fa-spinner spinner"></i> Generating your travel plan...</div>`;
+                                        break;
+
+                                    case "progress":
+                                        if (showAgentProgress) {
+                                            updateAgentStatus(data.agent, data.status, data.message);
+                                        }
+                                        break;
+
+                                    case "token":
+                                        if (accumulatedPlan === "") {
+                                            outputContent.innerHTML = "";
+                                        }
+                                        accumulatedPlan += data.content;
+                                        // Render markdown with marked.js dynamically
+                                        outputContent.innerHTML = marked.parse(accumulatedPlan);
+                                        // Auto-scroll output container
+                                        const outputPanel = document.querySelector(".output-panel");
+                                        outputPanel.scrollTop = outputPanel.scrollHeight;
+                                        break;
+
+                                    case "error":
+                                        addLog("StreamError", `Error in agent: ${data.agent || 'unknown'}. Message: ${data.message}`);
+                                        if (showAgentProgress && data.agent) {
+                                            updateAgentStatus(data.agent, "failed", data.message);
+                                        }
+                                        break;
+
+                                    case "final":
+                                        addLog("Stream", `Stream transmission final details received.`);
+                                        if (showAgentProgress) {
+                                            outputMeta.classList.remove("hidden");
+                                            
+                                            // Trace ID link
+                                            if (data.trace_id) {
+                                                traceContainer.innerHTML = `<i class="fa-solid fa-circle-nodes"></i> Trace: ${data.trace_id}`;
+                                                traceContainer.style.background = "rgba(16, 185, 129, 0.15)";
+                                                traceContainer.style.color = "#34d399";
+                                                traceContainer.style.borderColor = "rgba(16, 185, 129, 0.25)";
+                                            } else {
+                                                traceContainer.innerHTML = `<i class="fa-solid fa-link-slash"></i> No Trace`;
+                                                traceContainer.style.background = "rgba(239, 68, 68, 0.15)";
+                                                traceContainer.style.color = "#f87171";
+                                                traceContainer.style.borderColor = "rgba(239, 68, 68, 0.25)";
+                                            }
+
+                                            // Agents list
+                                            if (data.agents_used && Array.isArray(data.agents_used)) {
+                                                agentsUsedLabel.textContent = `Agents: ${data.agents_used.join(", ")}`;
+                                            }
+                                        } else {
+                                            window.lastTraceId = data.trace_id;
+                                        }
+                                        break;
+
+                                    case "done":
+                                        addLog("System", "Stream completed successfully.");
+                                        break;
+                                }
+                            } catch (err) {
+                                console.error("Error parsing JSON data block:", dataJson, err);
+                                addLog("SystemError", `Failed parsing packet: ${err.message}`);
+                            }
+                        }
+                    }
+                }
+
+            } catch (err) {
+                console.error("Connection failed:", err);
+                addLog("SystemError", `Fetch streaming failed: ${err.message}`);
+                outputContent.innerHTML = `<div style="color: var(--accent-error); font-weight: 600; padding: 1rem; border: 1px solid var(--accent-error); border-radius: 8px; background: rgba(239, 68, 68, 0.05);">Streaming Connection Error: ${err.message}</div>`;
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = `<i class="fa-solid fa-bolt"></i> Generate Stream Plan`;
+            }
+        }
+    </script>
+</body>
+</html>
